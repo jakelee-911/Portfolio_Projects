@@ -1,0 +1,30 @@
+with sub1 as(Select challenge_id as a1,sum(total_submissions) as b,sum(total_accepted_submissions) as c
+    from Submission_Stats
+    group by challenge_id),
+
+sub2 as(Select challenge_id as a2,sum(total_views) as d,sum(total_unique_views) as e
+        from View_Stats
+        group by challenge_id),
+
+sub3 as(Select a1,a2,COALESCE(b,0)as b,COALESCE(c,0)as c,COALESCE(d,0)as d,COALESCE(e,0)as e
+        from sub1
+        full join sub2
+        on a1=a2),
+
+sub4 as(Select college_id,sum(b) as b,sum(c) as c,sum(d) as d,sum(e) as e
+        from sub3
+        inner join Challenges
+        on Challenges.challenge_id=coalesce(a1,a2)
+        group by college_id),
+
+sub5 as(Select contest_id,sum(b) as b,sum(c) as c,sum(d) as d,sum(e) as e
+        from sub4
+        inner join colleges 
+        on colleges.college_id=sub4.college_id
+        group by contest_id)
+
+Select c.contest_id,hacker_id,name,b,c,d,e
+from sub5
+inner join contests as c
+on c.contest_id=sub5.contest_id
+order by c.contest_id
