@@ -6,7 +6,7 @@ group by Store
 order by TotalSales desc
 
 
--- 2> Which store has good quarterly growth rate in Q3’2012
+-- 2> Which store has good quarterly growth rate in Q3â€™2012
 
 --Normalize Date Column and Convert it from Character String to Date Data Type
 With sub1 as(Select Store,Convert(date,REPLACE(Date,'-','/'),103) as Date, Weekly_Sales
@@ -47,11 +47,6 @@ SELECT
 (Avg(Mean * Standard_Deviation) - (Avg(Mean) * Avg(Standard_Deviation))) / (StDevP(Mean) * StDevP(Standard_Deviation))  as Correlation
 FROM standard_deviation
 
-Select Store,sum(Weekly_Sales) as TotalSales
-From PortfolioProject1..Walmart_WeeklySales$
-Where DATEPART(yyyy,Date) = '2012'
-Group by Store
-Order by TotalSales desc
 
 --4) Some holidays have a negative impact on sales. Find out holidays which have higher sales than the mean sales in non-holiday season for all stores together
 
