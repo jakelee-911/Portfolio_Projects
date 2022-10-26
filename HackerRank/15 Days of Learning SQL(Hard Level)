@@ -1,0 +1,49 @@
+Declare @d date = '2016-03-01'
+Declare @date table (submission_date date, hacker_id int)
+insert into @date
+Select submission_date, hacker_id
+from submissions
+where submission_date = '2016-03-01'
+
+
+while @d <= '2016-03-14' 
+
+begin
+    insert into @date
+    select  submission_date,hacker_id
+    from submissions
+    where submission_date = dateadd(day,1,@d)
+    and hacker_id in (select hacker_id
+                      from @date
+                      where submission_date=@d)
+    set @d=dateadd(day,1,@d)
+end;
+
+with sub as(Select submission_date,hacker_id,count(*) as c
+            from submissions
+            group by submission_date,hacker_id
+            ),
+
+sub2 as(Select submission_date,hacker_id, c, max(c) over (partition by  submission_date) as d
+            from sub),
+            
+
+sub3 as(Select submission_date,hacker_id, c, min (hacker_id) over (partition by submission_date) as m
+        from sub2
+        where c=d),
+
+sub4 as(Select submission_date,hacker_id,c
+    from sub3
+    where hacker_id = m),
+    
+sub5 as( Select submission_date,count(distinct hacker_id) as co
+        from @date
+        group by submission_date)
+
+Select sub5.submission_date, co, sub4.hacker_id, name
+from sub5
+inner join sub4 
+on sub5.submission_date=sub4.submission_date
+inner join hackers 
+on sub4.hacker_id=hackers.hacker_id
+order by sub5.submission_date
